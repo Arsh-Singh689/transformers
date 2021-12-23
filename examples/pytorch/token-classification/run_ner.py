@@ -274,6 +274,7 @@ def main():
         text_column_name = data_args.text_column_name
     elif "tokens" in column_names:
         text_column_name = "tokens"
+        print("HEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEREEEEEEEEEEEEEEEEEEE")
     else:
         text_column_name = column_names[0]
 
@@ -283,6 +284,7 @@ def main():
         label_column_name = f"{data_args.task_name}_tags"
     else:
         label_column_name = column_names[1]
+    print(label_column_name)
 
     # In the event the labels are not a `Sequence[ClassLabel]`, we will need to go through the dataset to get the
     # unique labels.
@@ -296,10 +298,14 @@ def main():
 
     if isinstance(features[label_column_name].feature, ClassLabel):
         label_list = features[label_column_name].feature.names
+        print(label_list)
+        print("HEREEEEEEEEEEE1")
         # No need to convert the labels since they are already ints.
         label_to_id = {i: i for i in range(len(label_list))}
     else:
         label_list = get_label_list(raw_datasets["train"][label_column_name])
+        print(label_list)
+        print("HEREEEEEEEEEEE2")
         label_to_id = {l: i for i, l in enumerate(label_list)}
     num_labels = len(label_list)
 
@@ -380,6 +386,7 @@ def main():
         labels = []
         # print(tokenized_inputs)
         for i, label in enumerate(examples[label_column_name]):
+            print(label)
             word_ids = tokenized_inputs.word_ids(batch_index=i)
             previous_word_idx = None
             label_ids = []
