@@ -378,11 +378,14 @@ def main():
             is_split_into_words=True,
         )
         labels = []
+        # print(tokenized_inputs)
         for i, label in enumerate(examples[label_column_name]):
             word_ids = tokenized_inputs.word_ids(batch_index=i)
             previous_word_idx = None
             label_ids = []
+            # print(word_ids)
             for word_idx in word_ids:
+                # print(word_idx)
                 # Special tokens have a word id that is None. We set the label to -100 so they are automatically
                 # ignored in the loss function.
                 if word_idx is None:
