@@ -28,6 +28,8 @@ from typing import Optional
 import datasets
 import numpy as np
 from datasets import ClassLabel, load_dataset, load_metric
+import json
+from ast import literal_eval
 
 import transformers
 from transformers import (
@@ -284,7 +286,6 @@ def main():
         label_column_name = f"{data_args.task_name}_tags"
     else:
         label_column_name = column_names[1]
-    print(label_column_name)
 
     # In the event the labels are not a `Sequence[ClassLabel]`, we will need to go through the dataset to get the
     # unique labels.
@@ -374,12 +375,14 @@ def main():
     # Preprocessing the dataset
     # Padding strategy
     padding = "max_length" if data_args.pad_to_max_length else False
-
     # Tokenize all texts and align the labels with them.
     def tokenize_and_align_labels(examples):
-        # print(examples[text_column_name][0])
+        x = []
+        for ku in examples[text_column_name]:            
+            x.append(literal_eval(ku))
+        
         tokenized_inputs = tokenizer(
-            examples[text_column_name],
+            x,
             padding=padding,
             truncation=True,
             max_length=data_args.max_seq_length,
@@ -387,15 +390,11 @@ def main():
             is_split_into_words=True,
         )
         labels = []
-        print(tokenized_inputs)
         for i, label in enumerate(examples[label_column_name]):
-            # print(label)
+            print(label)
             word_ids = tokenized_inputs.word_ids(batch_index=i)
             previous_word_idx = None
             label_ids = []
-            # print("Here I will print tok_inp and word_ids")
-            # print(tokenized_inputs[i])
-            # print(word_ids)
             for word_idx in word_ids:
                 # print(word_idx)
                 # Special tokens have a word id that is None. We set the label to -100 so they are automatically
@@ -404,21 +403,11 @@ def main():
                     label_ids.append(-100)
                 # We set the label for the first token of each word.
                 elif word_idx != previous_word_idx:
-                    # print("label and word_idx")
-                    # print(label)
-                    # print(word_idx)
-                    # if word_idx<len(label):
                     label_ids.append(label_to_id[label[word_idx]])
-                    # else:
-                    #     break
                 # For the other tokens in a word, we set the label to either the current label or -100, depending on
                 # the label_all_tokens flag.
                 else:
                     if data_args.label_all_tokens:
-                        # if word_idx<len(label):
-                        #     label_ids.append(b_to_i_label[label_to_id[label[word_idx]]])
-                        # else:
-                        #     break
                         label_ids.append(b_to_i_label[label_to_id[label[word_idx]]])
                     else:
                         label_ids.append(-100)
@@ -429,6 +418,7 @@ def main():
         print("THHHHHHHHHHHHHHHAAAAAAAAAAAAAAAAANNNNNNNNNNNNNNNNNNKKKKKKKKKKKKKKKKKKKSSSSSSSSSSS")
         return tokenized_inputs
 
+
     if training_args.do_train:
         if "train" not in raw_datasets:
             raise ValueError("--do_train requires a train dataset")
@@ -436,8 +426,6 @@ def main():
         if data_args.max_train_samples is not None:
             train_dataset = train_dataset.select(range(data_args.max_train_samples))
         with training_args.main_process_first(desc="train dataset map pre-processing"):
-            print("train dataset")
-            print(train_dataset)
             train_dataset = train_dataset.map(
                 tokenize_and_align_labels,
                 batched=True,
@@ -445,7 +433,7 @@ def main():
                 load_from_cache_file=not data_args.overwrite_cache,
                 desc="Running tokenizer on train dataset",
             )
-    print("HEMLO 1")
+    # print("HEMLO 1")
     if training_args.do_eval:
         if "validation" not in raw_datasets:
             raise ValueError("--do_eval requires a validation dataset")
