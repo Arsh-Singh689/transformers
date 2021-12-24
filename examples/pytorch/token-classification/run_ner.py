@@ -290,23 +290,25 @@ def main():
     # unique labels.
     def get_label_list(labels):
         unique_labels = set()
+        # print(labels)
         for label in labels:
+            # print(label)
             unique_labels = unique_labels | set(label)
         label_list = list(unique_labels)
         label_list.sort()
         return label_list
 
-    if isinstance(features[label_column_name].feature, ClassLabel):
-        label_list = features[label_column_name].feature.names
-        print(label_list)
-        print("HEREEEEEEEEEEE1")
-        # No need to convert the labels since they are already ints.
-        label_to_id = {i: i for i in range(len(label_list))}
-    else:
-        label_list = get_label_list(raw_datasets["train"][label_column_name])
-        print(label_list)
-        print("HEREEEEEEEEEEE2")
-        label_to_id = {l: i for i, l in enumerate(label_list)}
+    # if isinstance(features[label_column_name].feature, ClassLabel):
+    #     label_list = features[label_column_name].feature.names
+    #     print(label_list)
+    #     print("HEREEEEEEEEEEE1")
+    #     # No need to convert the labels since they are already ints.
+    #     label_to_id = {i: i for i in range(len(label_list))}
+    # else:
+    label_list = get_label_list(raw_datasets["train"][label_column_name])
+    print(label_list)
+    print("HEREEEEEEEEEEE2")
+    label_to_id = {l: i for i, l in enumerate(label_list)}
     num_labels = len(label_list)
 
     # Map that sends B-Xxx label to its I-Xxx counterpart
@@ -375,6 +377,7 @@ def main():
 
     # Tokenize all texts and align the labels with them.
     def tokenize_and_align_labels(examples):
+        # print(examples[text_column_name][0])
         tokenized_inputs = tokenizer(
             examples[text_column_name],
             padding=padding,
@@ -384,12 +387,14 @@ def main():
             is_split_into_words=True,
         )
         labels = []
-        # print(tokenized_inputs)
+        print(tokenized_inputs)
         for i, label in enumerate(examples[label_column_name]):
-            print(label)
+            # print(label)
             word_ids = tokenized_inputs.word_ids(batch_index=i)
             previous_word_idx = None
             label_ids = []
+            # print("Here I will print tok_inp and word_ids")
+            # print(tokenized_inputs[i])
             # print(word_ids)
             for word_idx in word_ids:
                 # print(word_idx)
@@ -399,11 +404,21 @@ def main():
                     label_ids.append(-100)
                 # We set the label for the first token of each word.
                 elif word_idx != previous_word_idx:
+                    # print("label and word_idx")
+                    # print(label)
+                    # print(word_idx)
+                    # if word_idx<len(label):
                     label_ids.append(label_to_id[label[word_idx]])
+                    # else:
+                    #     break
                 # For the other tokens in a word, we set the label to either the current label or -100, depending on
                 # the label_all_tokens flag.
                 else:
                     if data_args.label_all_tokens:
+                        # if word_idx<len(label):
+                        #     label_ids.append(b_to_i_label[label_to_id[label[word_idx]]])
+                        # else:
+                        #     break
                         label_ids.append(b_to_i_label[label_to_id[label[word_idx]]])
                     else:
                         label_ids.append(-100)
@@ -411,6 +426,7 @@ def main():
 
             labels.append(label_ids)
         tokenized_inputs["labels"] = labels
+        print("THHHHHHHHHHHHHHHAAAAAAAAAAAAAAAAANNNNNNNNNNNNNNNNNNKKKKKKKKKKKKKKKKKKKSSSSSSSSSSS")
         return tokenized_inputs
 
     if training_args.do_train:
@@ -420,6 +436,8 @@ def main():
         if data_args.max_train_samples is not None:
             train_dataset = train_dataset.select(range(data_args.max_train_samples))
         with training_args.main_process_first(desc="train dataset map pre-processing"):
+            print("train dataset")
+            print(train_dataset)
             train_dataset = train_dataset.map(
                 tokenize_and_align_labels,
                 batched=True,
@@ -427,7 +445,7 @@ def main():
                 load_from_cache_file=not data_args.overwrite_cache,
                 desc="Running tokenizer on train dataset",
             )
-
+    print("HEMLO 1")
     if training_args.do_eval:
         if "validation" not in raw_datasets:
             raise ValueError("--do_eval requires a validation dataset")
@@ -465,6 +483,7 @@ def main():
     metric = load_metric("seqeval")
 
     def compute_metrics(p):
+        print("HEMLO 2")
         predictions, labels = p
         predictions = np.argmax(predictions, axis=2)
 
