@@ -378,7 +378,8 @@ def main():
     # Tokenize all texts and align the labels with them.
     def tokenize_and_align_labels(examples):
         x = []
-        for ku in examples[text_column_name]:            
+        for ku in examples[text_column_name]: 
+            print(ku)           
             x.append(literal_eval(ku))
         
         tokenized_inputs = tokenizer(
