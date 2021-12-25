@@ -1,0 +1,5 @@
+{'task': {'name': 'Token Classification', 'type': 'token-classification'},
+'metrics': [{'name': 'Precision', 'type': 'precision', 'value': 0.17699115044247787}, 
+	{'name': 'Recall', 'type': 'recall', 'value': 0.06172839506172839}, 
+	{'name': 'F1', 'type': 'f1', 'value': 0.09153318077803203}, 
+	{'name': 'Accuracy', 'type': 'accuracy', 'value': 0.7781698536073626}]}
