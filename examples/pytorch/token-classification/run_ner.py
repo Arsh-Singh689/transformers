@@ -276,7 +276,6 @@ def main():
         text_column_name = data_args.text_column_name
     elif "tokens" in column_names:
         text_column_name = "tokens"
-        print("HEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEREEEEEEEEEEEEEEEEEEE")
     else:
         text_column_name = column_names[0]
 
@@ -308,7 +307,6 @@ def main():
     # else:
     label_list = get_label_list(raw_datasets["train"][label_column_name])
     print(label_list)
-    print("HEREEEEEEEEEEE2")
     label_to_id = {l: i for i, l in enumerate(label_list)}
     num_labels = len(label_list)
 
@@ -378,8 +376,7 @@ def main():
     # Tokenize all texts and align the labels with them.
     def tokenize_and_align_labels(examples):
         x = []
-        for ku in examples[text_column_name]: 
-            print(ku)           
+        for ku in examples[text_column_name]: # To convert the string list inside the tokens list into individual list elements which are sentences
             x.append(literal_eval(ku))
         
         tokenized_inputs = tokenizer(
@@ -392,7 +389,6 @@ def main():
         )
         labels = []
         for i, label in enumerate(examples[label_column_name]):
-            print(label)
             word_ids = tokenized_inputs.word_ids(batch_index=i)
             previous_word_idx = None
             label_ids = []
@@ -416,7 +412,6 @@ def main():
 
             labels.append(label_ids)
         tokenized_inputs["labels"] = labels
-        print("THHHHHHHHHHHHHHHAAAAAAAAAAAAAAAAANNNNNNNNNNNNNNNNNNKKKKKKKKKKKKKKKKKKKSSSSSSSSSSS")
         return tokenized_inputs
 
 
